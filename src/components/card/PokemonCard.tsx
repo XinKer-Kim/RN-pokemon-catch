@@ -1,44 +1,89 @@
 // /components/card/PokemonCard.tsx
-
+import { typeDetails } from "@/src/constants/pokemonTypes";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 
-// 1. 컴포넌트가 받을 props의 타입을 정의합니다.
+// --- 타입 정의 섹션 ---
 type PokemonCardProps = {
   pokemonId: string;
 };
 
-// 2. API 응답 데이터 중에서 사용할 것들의 타입만 정의합니다.
-interface PokemonData {
+// 'pokemon' API에서 가져올 데이터 타입
+interface PokemonApiResponse {
   name: string;
   sprites: {
     front_default: string;
   };
+  types: {
+    type: {
+      name: string;
+      url: string;
+    };
+  }[];
 }
 
-// props에 위에서 정의한 타입을 적용합니다.
+// 'pokemon-species' API에서 가져올 데이터 타입 (필요한 부분만)
+interface PokemonSpeciesApiResponse {
+  names: {
+    language: { name: string };
+    name: string;
+  }[];
+}
+
+// 화면에 표시하기 위해 두 API의 데이터를 조합한 최종 데이터 타입
+interface DisplayPokemonData {
+  koreanName: string;
+  englishName: string;
+  spriteUrl: string;
+  types: PokemonApiResponse["types"]; // PokemonApiResponse의 types 타입을 그대로 사용
+}
+
 export function PokemonCard({ pokemonId }: PokemonCardProps) {
-  // 3. useState를 사용할 때, 어떤 타입의 state인지 제네릭(<>)으로 명시합니다.
-  // PokemonData 타입이거나, 아직 데이터가 없으면 null일 수 있습니다.
-  const [pokemonData, setPokemonData] = useState<PokemonData | null>(null);
+  // 상태(state)가 이제 새로운 조합 데이터 타입을 사용합니다.
+  const [pokemonData, setPokemonData] = useState<DisplayPokemonData | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchPokemonData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(
-          `https://pokeapi.co/api/v2/pokemon/${pokemonId}/`
+
+        // 1. 두 개의 API를 동시에 호출합니다.
+        const [pokemonResponse, speciesResponse] = await Promise.all([
+          fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/`),
+          fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}/`),
+        ]);
+
+        // 2. 두 응답을 각각 json으로 파싱합니다.
+        const pokemonResult =
+          (await pokemonResponse.json()) as PokemonApiResponse;
+        const speciesResult =
+          (await speciesResponse.json()) as PokemonSpeciesApiResponse;
+
+        // 3. 'pokemon-species' 결과에서 한국어 이름을 찾습니다.
+        // find() 메서드로 language.name이 'ko'인 객체를 찾습니다.
+        const koreanNameEntry = speciesResult.names.find(
+          (entry) => entry.language.name === "ko"
         );
-        // 받아온 json 데이터가 PokemonData 타입일 것이라고 명시해줍니다.
-        const data = (await response.json()) as PokemonData;
-        setPokemonData(data);
+
+        // 한글 이름이 있으면 사용하고, 없으면 영어 이름을 대신 사용 (Fallback)
+        const koreanName = koreanNameEntry?.name ?? pokemonResult.name;
+
+        // 4. 최종 데이터에 types 정보도 함께 저장합니다.
+        setPokemonData({
+          koreanName: koreanName,
+          englishName: pokemonResult.name,
+          spriteUrl: pokemonResult.sprites.front_default,
+          types: pokemonResult.types, // API에서 받아온 types 배열을 그대로 저장
+        });
       } catch (error) {
         console.error(
           `Failed to fetch pokemon data for ID ${pokemonId}:`,
           error
         );
-        setPokemonData(null); // 에러 발생 시 데이터를 null로 초기화
+        setPokemonData(null);
       } finally {
         setIsLoading(false);
       }
@@ -47,6 +92,7 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
     fetchPokemonData();
   }, [pokemonId]);
 
+  // --- 렌더링 섹션 (이하 동일, 텍스트만 변경) ---
   if (isLoading) {
     return (
       <View className="flex-1 h-60 m-1 justify-center items-center bg-gray-100 rounded-lg">
@@ -66,22 +112,42 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
 
   return (
     <View className="flex-1 h-60 m-1">
-      <View className="w-full h-full bg-gray-100 justify-center items-center rounded-lg border border-gray-200">
-        <>
-          {/* 이제 pokemonData.sprites.front_default 를 입력할 때 자동완성이 지원됩니다. */}
+      <Pressable className="w-full h-full bg-white justify-between items-center rounded-lg border border-gray-200">
+        {/* 포켓몬 이름과 이미지를 담는 상단 View */}
+        <View className="w-full items-center -m-2">
           <Image
-            source={{ uri: pokemonData.sprites.front_default }}
-            className="w-32 h-32"
+            source={{ uri: pokemonData.spriteUrl }}
+            className="w-48 h-48"
             resizeMode="contain"
           />
           <Text
-            className="text-lg capitalize"
+            className="text-2xl font-semibold -m-6"
             style={{ fontFamily: "DungGeunMo" }}
           >
-            {pokemonData.name}
+            {pokemonData.koreanName}
           </Text>
-        </>
-      </View>
+        </View>
+
+        {/* 5. 타입 뱃지를 렌더링하는 View */}
+        <View className="flex-row gap-x-1 mb-3">
+          {pokemonData.types.map(({ type }) => (
+            // type.name (영어이름)을 키로 사용합니다.
+            <View
+              key={type.name}
+              className="px-3 py-1 rounded-lg"
+              // `typeDetails`에서 영어 이름에 맞는 색상을 찾아 적용합니다.
+              style={{
+                backgroundColor: typeDetails[type.name]?.color ?? "#A8A77A",
+              }}
+            >
+              <Text className="text-white text-s font-bold">
+                {/* `typeDetails`에서 영어 이름에 맞는 한글 이름을 찾아 표시합니다. */}
+                {typeDetails[type.name]?.koreanName ?? type.name}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </Pressable>
     </View>
   );
 }

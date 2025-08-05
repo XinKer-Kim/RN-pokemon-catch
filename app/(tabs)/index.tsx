@@ -10,17 +10,6 @@ const pokemonToFetch = [
   { id: "7" }, // 꼬부기
   { id: "143" }, // 잠만보
 ];
-const pokemonData = [
-  { id: "1", color: "bg-green-50", name: "이상해씨" },
-  {
-    id: "2",
-    color: "bg-yellow-50",
-    name: "피카츄",
-    // style: { borderWidth: 1, borderColor: "#eee" },
-  },
-  { id: "3", color: "bg-blue-50", name: "꼬부기" },
-  { id: "4", color: "bg-red-50", name: "파이리" },
-];
 export default function Index() {
   return (
     <View className="w-full h-full">
