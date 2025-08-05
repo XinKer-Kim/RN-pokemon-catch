@@ -1,7 +1,15 @@
 // /components/card/PokemonCard.tsx
 import { typeDetails } from "@/src/constants/pokemonTypes";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // --- 타입 정의 섹션 ---
 type PokemonCardProps = {
@@ -44,7 +52,11 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  // --- 데이터 패칭 섹션 ---
+  // useEffect 훅을 사용하여 컴포넌트가 마운트될 때 API를 호출합니다.
+  // pokemonId가 변경될 때마다 새로운 데이터를 가져옵니다.
   useEffect(() => {
     const fetchPokemonData = async () => {
       try {
@@ -112,7 +124,10 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
 
   return (
     <View className="flex-1 h-60 m-1">
-      <Pressable className="w-full h-full bg-white justify-between items-center rounded-lg border border-gray-200">
+      <Pressable
+        onPress={() => setModalVisible(true)}
+        className="w-full h-full bg-white justify-between items-center rounded-lg border border-gray-200"
+      >
         {/* 포켓몬 이름과 이미지를 담는 상단 View */}
         <View className="w-full items-center -m-2">
           <Image
@@ -148,6 +163,25 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
           ))}
         </View>
       </Pressable>
+      <Modal visible={modalVisible} animationType="slide">
+        <SafeAreaView className="p-4">
+          <View className="flex-row w-full items-center">
+            <Image
+              source={{ uri: pokemonData.spriteUrl }}
+              className="w-24 h-24"
+            />
+            <Pressable className="bg-amber-100 py-3 px-4">
+              <Text className="text-2xl font-semibold -m-6">포획</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setModalVisible(false)}
+              className="bg-neutral-100 py-4 px-6"
+            >
+              <Text className="text-2xl font-semibold -m-6">닫기</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
