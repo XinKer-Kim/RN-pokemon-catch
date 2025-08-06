@@ -1,15 +1,8 @@
 // /components/card/PokemonCard.tsx
 import { typeDetails } from "@/src/constants/pokemonTypes";
+import { useModalStore } from "@/src/store/modalStore";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Modal,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 
 // --- 타입 정의 섹션 ---
 type PokemonCardProps = {
@@ -32,6 +25,7 @@ interface PokemonApiResponse {
 
 // 'pokemon-species' API에서 가져올 데이터 타입 (필요한 부분만)
 interface PokemonSpeciesApiResponse {
+  capture_rate: number;
   names: {
     language: { name: string };
     name: string;
@@ -40,19 +34,20 @@ interface PokemonSpeciesApiResponse {
 
 // 화면에 표시하기 위해 두 API의 데이터를 조합한 최종 데이터 타입
 interface DisplayPokemonData {
+  id: string;
   koreanName: string;
   englishName: string;
   spriteUrl: string;
   types: PokemonApiResponse["types"]; // PokemonApiResponse의 types 타입을 그대로 사용
+  baseCaptureRate: number;
 }
 
 export function PokemonCard({ pokemonId }: PokemonCardProps) {
-  // 상태(state)가 이제 새로운 조합 데이터 타입을 사용합니다.
+  const { openModal } = useModalStore();
   const [pokemonData, setPokemonData] = useState<DisplayPokemonData | null>(
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   // --- 데이터 패칭 섹션 ---
   // useEffect 훅을 사용하여 컴포넌트가 마운트될 때 API를 호출합니다.
@@ -84,11 +79,13 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
         const koreanName = koreanNameEntry?.name ?? pokemonResult.name;
 
         // 4. 최종 데이터에 types 정보도 함께 저장합니다.
+
         setPokemonData({
+          id: pokemonId,
           koreanName: koreanName,
-          englishName: pokemonResult.name,
           spriteUrl: pokemonResult.sprites.front_default,
-          types: pokemonResult.types, // API에서 받아온 types 배열을 그대로 저장
+          types: pokemonResult.types,
+          baseCaptureRate: speciesResult.capture_rate, // 4. API에서 받은 포획률 저장
         });
       } catch (error) {
         console.error(
@@ -125,7 +122,7 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
   return (
     <View className="flex-1 h-60 m-1">
       <Pressable
-        onPress={() => setModalVisible(true)}
+        onPress={() => openModal(pokemonData)}
         className="w-full h-full bg-white justify-between items-center rounded-lg border border-gray-200"
       >
         {/* 포켓몬 이름과 이미지를 담는 상단 View */}
@@ -163,7 +160,7 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
           ))}
         </View>
       </Pressable>
-      <Modal visible={modalVisible} animationType="slide">
+      {/* <Modal visible={modalVisible} animationType="slide">
         <SafeAreaView className="p-4">
           <View className="flex-row w-full items-center">
             <Image
@@ -181,7 +178,7 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
             </Pressable>
           </View>
         </SafeAreaView>
-      </Modal>
+      </Modal> */}
     </View>
   );
 }
