@@ -85,7 +85,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
       set({ message: "남은 사파리볼이 없다!" });
       setTimeout(
         () => set({ message: `${pokemonData.koreanName}은(는) 가만히 있다.` }),
-        1000
+        600
       );
       return;
     }
@@ -109,13 +109,13 @@ export const useModalStore = create<ModalState>((set, get) => ({
           gameStatus: "CAUGHT",
           message: `신난다ー！ ${pokemonData.koreanName}을(를) 잡았다!`,
         });
-        // 2. 포획 성공 시, 도감 스토어에 잡은 포켓몬 ID를 추가합니다.
+        // 포획 성공 시, 도감 스토어에 잡은 포켓몬 ID를 전달하여 카운트를 증가시킵니다.
         usePokedexStore.getState().addCaughtPokemon(pokemonData.id);
       } else {
         set({ message: "아... 조금만 더하면 잡을 수 있었는데!" });
         get().checkFlee();
       }
-    }, 2000);
+    }, 600);
   },
 
   throwBait: () => {
@@ -133,7 +133,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
         fleeRateModifier: Math.max(0.1, state.fleeRateModifier * 0.5),
       }));
       get().checkFlee();
-    }, 1500);
+    }, 500);
   },
 
   throwMud: () => {

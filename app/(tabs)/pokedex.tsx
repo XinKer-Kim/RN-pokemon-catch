@@ -1,20 +1,20 @@
 // /app/pokedex.tsx
 
 import { PokedexGridItem } from "@/src/components/pokedex/PokedexGridItem";
-import { usePokedexStore } from "@/src/store/pokedexStore"; // 1. 도감 스토어를 import 합니다.
+import { usePokedexStore } from "@/src/store/pokedexStore"; // 도감 스토어를 import 합니다.
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// 포켓몬 목록 API의 응답 타입
 interface PokemonListResult {
   name: string;
   url: string;
 }
 
-const caughtPokemonIds = usePokedexStore((state) => state.caughtPokemonIds);
-
 export default function PokedexScreen() {
+  // 스토어에서 `caughtCounts` 객체를 올바르게 선택하여 가져옵니다.
+  const caughtCounts = usePokedexStore((state) => state.caughtCounts);
+
   const [pokemonList, setPokemonList] = useState<PokemonListResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,7 +46,6 @@ export default function PokedexScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white p-2">
-      {/* 헤더 UI */}
       <View className="flex-row justify-between items-center mb-4 px-2">
         <Text
           className="text-2xl font-bold"
@@ -54,23 +53,24 @@ export default function PokedexScreen() {
         >
           관동 도감
         </Text>
-        <Text className="font-bold text-lg">{caughtPokemonIds.size} / 151</Text>
+        {/* 1. caughtCounts가 undefined일 경우 빈 객체({})를 사용하도록 수정 */}
+        <Text className="font-bold text-lg">
+          {Object.keys(caughtCounts || {}).length} / 151
+        </Text>
       </View>
 
-      {/* 포켓몬 그리드 리스트 */}
       <FlatList
         data={pokemonList}
-        numColumns={4} // 한 줄에 4개씩 표시
+        numColumns={4}
         keyExtractor={(item) => item.name}
         renderItem={({ item, index }) => {
-          // API 응답의 index는 0부터 시작하므로 +1 해줍니다.
           const id = String(index + 1);
           return (
             <PokedexGridItem
               name={item.name}
               url={item.url}
-              // isCaught 상태를 넘겨주어 실루엣 효과를 제어합니다.
-              isCaught={caughtPokemonIds.has(id)}
+              // 2. caughtCounts가 존재할 때만 id를 확인하도록 수정
+              isCaught={!!(caughtCounts && caughtCounts[id])}
             />
           );
         }}
