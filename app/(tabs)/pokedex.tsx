@@ -55,7 +55,7 @@ export default function PokedexScreen() {
           className="text-2xl font-bold"
           style={{ fontFamily: "DungGeunMo" }}
         >
-          칸토 도감
+          관동 도감
         </Text>
         <Text className="font-bold text-lg">{caughtPokemonIds.size} / 151</Text>
       </View>
