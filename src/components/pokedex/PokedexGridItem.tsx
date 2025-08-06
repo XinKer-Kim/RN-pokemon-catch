@@ -18,8 +18,7 @@ export function PokedexGridItem({ name, url, isCaught }: PokedexGridItemProps) {
   const id = extractIdFromUrl(url);
 
   // API 호출 없이 이미지 URL을 직접 구성하여 성능 최적화 (기존과 동일)
-  const spriteUrl =
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png";
+  const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 
   const handlePress = () => {
     router.push(`/pokemon/${id}`);
