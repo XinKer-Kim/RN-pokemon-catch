@@ -4,6 +4,7 @@ import { useModalStore } from "@/src/store/modalStore";
 import { useEffect, useRef } from "react";
 import {
   Animated,
+  Image,
   ImageBackground,
   Modal,
   Pressable,
@@ -28,21 +29,23 @@ const ActionButton = ({
 );
 
 export function PokemonDetailModal() {
+  // 2. safariBalls와 runAway 액션을 스토어에서 가져옵니다.
   const {
     isVisible,
     pokemonData,
     gameStatus,
     message,
+    safariBalls,
     closeModal,
     throwBall,
     throwBait,
     throwMud,
+    runAway,
   } = useModalStore();
   const shakeAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (gameStatus === "THROWING_BALL") {
-      // 볼 던질 때 포켓볼이 흔들리는 애니메이션
       Animated.sequence([
         Animated.timing(shakeAnimation, {
           toValue: 10,
@@ -70,44 +73,69 @@ export function PokemonDetailModal() {
 
   if (!pokemonData) return null;
 
-  const isActionable = gameStatus === "ENCOUNTER" || gameStatus === "FAIL";
+  const isActionable = gameStatus === "ENCOUNTER";
+  // 1. 게임 종료 상태인지 확인하는 변수
+  const isGameEnd =
+    gameStatus === "CAUGHT" ||
+    gameStatus === "POKEMON_FLED" ||
+    gameStatus === "PLAYER_FLED";
+
+  const handlePressOnEnd = () => {
+    // 게임이 종료된 상태에서만 모달을 닫습니다.
+    if (isGameEnd) {
+      closeModal();
+    }
+  };
 
   return (
-    <Modal visible={isVisible} animationType="slide" transparent={false}>
-      <ImageBackground
-        source={{
-          uri: "https://img.freepik.com/premium-vector/pixel-art-game-background-grass-sky-clouds_210544-62.jpg",
-        }}
-        className="flex-1 justify-end"
+    <Modal visible={isVisible} animationType="slide" transparent={true}>
+      {/* 1. 모달 전체를 감싸는 Pressable 추가. 게임 종료 시에만 활성화됩니다. */}
+      <Pressable
+        onPress={handlePressOnEnd}
+        disabled={!isGameEnd}
+        className="flex-1"
       >
-        <View className="absolute top-1/4 self-center">
-          {/* 포켓몬 이미지 */}
-          <Animated.Image
-            source={{ uri: pokemonData.spriteUrl }}
-            className="w-64 h-64"
-            style={{ transform: [{ translateX: shakeAnimation }] }}
-          />
-        </View>
-
-        {/* 하단 UI 영역 */}
-        <View className="bg-black/70 border-t-4 border-gray-500 p-2">
-          {/* 메시지 창 */}
-          <View className="bg-white rounded-lg p-3 h-24 justify-center border-4 border-gray-300">
-            <Text className="text-lg" style={{ fontFamily: "DungGeunMo" }}>
-              {message}
-            </Text>
+        <ImageBackground
+          source={{
+            uri: "https://static.wikia.nocookie.net/pokemon/images/c/cb/%EA%B4%80%EB%8F%99_%EC%82%AC%ED%8C%8C%EB%A6%AC%EC%A1%B4_%ED%8C%8C%EB%A0%88%EB%A6%AC%EA%B7%B8_%EB%8C%80%ED%91%9C_%EC%9D%B4%EB%AF%B8%EC%A7%80.png/revision/latest?cb=20110828144647&path-prefix=ko",
+          }}
+          className="flex-1 justify-end"
+        >
+          <View className="absolute top-1/4 self-center">
+            <Animated.Image
+              source={{ uri: pokemonData.spriteUrl }}
+              className="w-64 h-64"
+              style={{ transform: [{ translateX: shakeAnimation }] }}
+            />
           </View>
 
-          {/* 액션 버튼 */}
-          <View className="flex-row gap-2 mt-2">
-            {gameStatus === "CAUGHT" || gameStatus === "FLED" ? (
-              <ActionButton
-                text="닫기"
-                onPress={closeModal}
-                color="bg-blue-600"
+          <View className="bg-black/70 border-t-4 border-gray-500 p-2">
+            {/* 2. 볼 개수 표시 UI 추가 */}
+            <View className="absolute -top-12 right-4 bg-white/80 rounded-full px-4 py-2 flex-row items-center border-2 border-gray-500">
+              <Image
+                source={{
+                  uri: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/safari-ball.png",
+                }}
+                className="w-6 h-6 mr-2"
               />
-            ) : (
-              <>
+              <Text className="font-bold text-lg">{safariBalls}</Text>
+            </View>
+
+            <View className="bg-white rounded-lg p-3 h-24 justify-center border-4 border-gray-300">
+              <Text className="text-lg" style={{ fontFamily: "DungGeunMo" }}>
+                {message}
+              </Text>
+              {/* 1. 게임 종료 시 다음으로 넘어가는 안내 메시지 */}
+              {isGameEnd && (
+                <Text className="absolute bottom-1 right-2 text-xs text-gray-500">
+                  아무 곳이나 눌러서 닫기...
+                </Text>
+              )}
+            </View>
+
+            {/* 1. 게임 종료 시에는 버튼을 숨깁니다. */}
+            {!isGameEnd && (
+              <View className="flex-row gap-2 mt-2">
                 <ActionButton
                   text="볼"
                   onPress={throwBall}
@@ -128,14 +156,14 @@ export function PokemonDetailModal() {
                 />
                 <ActionButton
                   text="도망"
-                  onPress={closeModal}
+                  onPress={runAway}
                   disabled={!isActionable}
                 />
-              </>
+              </View>
             )}
           </View>
-        </View>
-      </ImageBackground>
+        </ImageBackground>
+      </Pressable>
     </Modal>
   );
 }
