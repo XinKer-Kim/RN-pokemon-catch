@@ -1,10 +1,10 @@
 // /app/pokedex.tsx
 
+import { PokedexGridItem } from "@/src/components/pokedex/PokedexGridItem";
+import { usePokedexStore } from "@/src/store/pokedexStore"; // 1. 도감 스토어를 import 합니다.
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// PokedexGridItem을 import 합니다. TypeCard는 더 이상 필요 없습니다.
-import { PokedexGridItem } from "@/src/components/pokedex/PokedexGridItem";
 
 // 포켓몬 목록 API의 응답 타입
 interface PokemonListResult {
@@ -12,19 +12,16 @@ interface PokemonListResult {
   url: string;
 }
 
-// 임시로 포획한 포켓몬 ID 목록을 만듭니다. (나중에는 실제 데이터로 대체)
-const caughtPokemonIds = new Set(["1", "2", "3", "4", "25", "149"]);
+const caughtPokemonIds = usePokedexStore((state) => state.caughtPokemonIds);
 
 export default function PokedexScreen() {
   const [pokemonList, setPokemonList] = useState<PokemonListResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 기존의 타입 목록 대신 칸토 지방 포켓몬 목록을 불러오는 함수로 변경
     const fetchKantoPokemon = async () => {
       try {
         setIsLoading(true);
-        // 151마리 포켓몬 목록을 한 번에 가져옵니다.
         const response = await fetch(
           "https://pokeapi.co/api/v2/pokemon?limit=151&offset=0"
         );

@@ -2,6 +2,7 @@
 
 import { DisplayPokemonData } from "@/src/components/card/PokemonCard";
 import { create } from "zustand";
+import { usePokedexStore } from "./pokedexStore";
 
 // 게임 상태를 더 명확하게 정의합니다.
 type GameStatus =
@@ -106,8 +107,10 @@ export const useModalStore = create<ModalState>((set, get) => ({
         // 1. 포획 성공 메시지를 보여주고, 게임 종료 상태로 변경 (자동 닫기 제거)
         set({
           gameStatus: "CAUGHT",
-          message: `やったー！ ${pokemonData.koreanName}을(를) 잡았다!`,
+          message: `신난다ー！ ${pokemonData.koreanName}을(를) 잡았다!`,
         });
+        // 2. 포획 성공 시, 도감 스토어에 잡은 포켓몬 ID를 추가합니다.
+        usePokedexStore.getState().addCaughtPokemon(pokemonData.id);
       } else {
         set({ message: "아... 조금만 더하면 잡을 수 있었는데!" });
         get().checkFlee();

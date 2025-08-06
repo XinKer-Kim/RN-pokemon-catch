@@ -3,7 +3,6 @@ import { AppHeader } from "@/src/components/common";
 import { useEffect, useState } from "react"; // useState와 useEffect를 import 합니다.
 import { FlatList, Pressable, Text, View } from "react-native";
 
-// 포켓몬 ID 목록의 타입을 정의합니다.
 type PokemonId = {
   id: string;
 };
@@ -12,7 +11,7 @@ export default function Index() {
   // 1. 동적인 포켓몬 목록을 저장하기 위한 state를 생성합니다.
   const [pokemonList, setPokemonList] = useState<PokemonId[]>([]);
 
-  // 2. 랜덤 포켓몬 목록을 생성하는 함수를 정의합니다.
+  // 2. 랜덤 포켓몬 목록을 생성하는 함수 정의.
   const generateRandomPokemon = () => {
     const POKEMON_COUNT = 10; // 한 번에 보여줄 포켓몬 수
     const MAX_ID = 151; // 포켓몬 ID의 최대값
@@ -26,7 +25,7 @@ export default function Index() {
       [allIds[i], allIds[j]] = [allIds[j], allIds[i]];
     }
 
-    // 섞인 배열에서 앞의 6개를 잘라내고, FlatList가 요구하는 객체 형태로 변환합니다.
+    // 섞인 배열에서 앞의 10개를 잘라내고, FlatList가 요구하는 객체 형태로 변환합니다.
     const randomIds = allIds.slice(0, POKEMON_COUNT).map((id) => ({
       id: String(id),
     }));
@@ -43,7 +42,7 @@ export default function Index() {
     <View className="w-full h-full p-2">
       <AppHeader />
 
-      {/* 4. 새로운 포켓몬을 만날 수 있는 버튼을 추가합니다. */}
+      {/* 4. 포켓몬 목록 갱신 버튼 */}
       <Pressable
         onPress={generateRandomPokemon}
         className="bg-green-600 p-4 rounded-lg my-4"
@@ -57,15 +56,13 @@ export default function Index() {
         야생의 포켓몬이(가) 나타났다!
       </Text>
 
-      {/* 5. FlatList의 data를 고정된 배열 대신 state(pokemonList)로 교체합니다. */}
+      {/* 5. FlatList의 data로 state(pokemonList)전달 */}
       <FlatList
         data={pokemonList}
         numColumns={2}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PokemonCard pokemonId={item.id} />}
       />
-      {/* PokemonDetailModal은 _layout.tsx로 이동했으므로 여기서 제거해도 좋습니다.
-          만약 아직 _layout.tsx로 옮기지 않았다면 그대로 두셔도 됩니다. */}
     </View>
   );
 }
