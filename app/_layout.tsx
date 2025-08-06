@@ -1,7 +1,9 @@
+import { PokemonDetailModal } from "@/src/components/modal/PokemonDetailModal";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import "./global.css";
 
 const appTheme = {
@@ -21,6 +23,7 @@ export default function RootLayout() {
     <ThemeProvider value={appTheme}>
       <SafeAreaView className="w-full h-full">
         <Slot />
+        <PokemonDetailModal />
       </SafeAreaView>
     </ThemeProvider>
   );
