@@ -1,9 +1,12 @@
 // /app/pokemon/[id].tsx
 
+import { PokemonStats } from "@/src/components/pokedex/PokemonStats"; // 1. 새로 만든 스탯 컴포넌트 import
 import { typeDetails } from "@/src/constants/pokemonTypes";
 import { usePokedexStore } from "@/src/store/pokedexStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { navigate } from "expo-router/build/global-state/routing";
 import { useEffect, useState } from "react";
+
 import {
   ActivityIndicator,
   Image,
@@ -13,8 +16,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-// 상세 정보에 필요한 모든 타입을 통합
 interface PokemonDetail {
   id: number;
   koreanName: string;
@@ -24,6 +25,11 @@ interface PokemonDetail {
   weight: number; // 킬로그램(kg)
   koreanCategory: string; // "씨앗포켓몬" 등
   koreanFlavorText: string; // 도감 설명
+  stats: {
+    base_stat: number;
+    stat: { name: string };
+  }[];
+  colorName: string;
 }
 
 export default function PokemonDetailScreen() {
@@ -75,6 +81,8 @@ export default function PokemonDetailScreen() {
           types: pokemonData.types,
           height: pokemonData.height / 10,
           weight: pokemonData.weight / 10,
+          stats: pokemonData.stats,
+          colorName: speciesData.color.name,
         });
       } catch (error) {
         console.error("Failed to fetch pokemon details:", error);
@@ -101,7 +109,8 @@ export default function PokemonDetailScreen() {
       <View className="flex-row justify-between items-center relative h-12">
         {/* 2. 닫기 버튼 추가 */}
         <Pressable
-          onPress={() => router.back()}
+          // onPress={() => router.back()} //홈으로 보내버려서 의도치 않게 작동.
+          onPress={() => navigate("/(tabs)/pokedex")} //TODO : 뒤로 갔을 때 열려있는 도감 내용으로 이어가기.
           className="absolute left-0 z-10 bg-blue-500 p-2 rounded-lg"
         >
           <Text className="text-white font-bold">닫기</Text>
@@ -126,15 +135,15 @@ export default function PokemonDetailScreen() {
             style={!isCaught ? { tintColor: "black" } : {}}
           />
         </View>
-
         {/* 1. 긴 도감 설명이 잘리지 않도록 ScrollView 추가 */}
         <ScrollView showsVerticalScrollIndicator={false}>
           {isCaught && details ? (
             // --- 잡았을 때 보여줄 정보 ---
             <View className="items-center">
-              <Text className="text-lg font-bold mt-2">
-                {details.koreanCategory}
+              <Text className="text-2xl font-bold mt-2">
+                {details.koreanName}
               </Text>
+
               <View className="flex-row justify-center gap-2 my-2">
                 {details.types.map(({ type }) => (
                   <View
@@ -151,6 +160,9 @@ export default function PokemonDetailScreen() {
                   </View>
                 ))}
               </View>
+              <Text className="text-lg font-bold mt-2">
+                {details.koreanCategory}
+              </Text>
               <View className="flex-row justify-around my-4 w-full">
                 <View className="items-center">
                   <Text className="text-gray-500">키</Text>
@@ -164,6 +176,10 @@ export default function PokemonDetailScreen() {
               <Text className="text-center leading-6 px-2">
                 {details.koreanFlavorText}
               </Text>
+              <PokemonStats
+                stats={details?.stats}
+                colorName={details.colorName}
+              />
             </View>
           ) : (
             // --- 못 잡았을 때 보여줄 정보 ---
