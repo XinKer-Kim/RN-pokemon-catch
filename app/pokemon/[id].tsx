@@ -116,7 +116,7 @@ export default function PokemonDetailScreen() {
           <Text className="text-white font-bold">닫기</Text>
         </Pressable>
         <Text className="text-white text-3xl font-bold text-center flex-1">
-          {isCaught ? details?.koreanName : "???"}
+          {/* {isCaught ? details?.koreanName : "???"} */}
         </Text>
         <Text className="text-white text-2xl font-bold">
           #{String(currentId).padStart(4, "0")}

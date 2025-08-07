@@ -160,25 +160,6 @@ export function PokemonCard({ pokemonId }: PokemonCardProps) {
           ))}
         </View>
       </Pressable>
-      {/* <Modal visible={modalVisible} animationType="slide">
-        <SafeAreaView className="p-4">
-          <View className="flex-row w-full items-center">
-            <Image
-              source={{ uri: pokemonData.spriteUrl }}
-              className="w-24 h-24"
-            />
-            <Pressable className="bg-amber-100 py-3 px-4">
-              <Text className="text-2xl font-semibold -m-6">포획</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setModalVisible(false)}
-              className="bg-neutral-100 py-4 px-6"
-            >
-              <Text className="text-2xl font-semibold -m-6">닫기</Text>
-            </Pressable>
-          </View>
-        </SafeAreaView>
-      </Modal> */}
     </View>
   );
 }
