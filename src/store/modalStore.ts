@@ -17,11 +17,11 @@ type GameStatus =
 const baitMessages = [
   "포켓몬은 먹이를 맛있게 먹고 있다.",
   "포켓몬은 먹이에 정신이 팔려있다!",
-  "포켓몬은 경계를 풀고 먹이를 먹는다.",
+  "먹이를 던졌다!",
 ];
 
 const mudMessages = [
-  "포켓몬은 화가 나서 날뛰고 있다!",
+  "진흙을 던졌다!",
   "포켓몬의 몸에 진흙이 명중했다!",
   "포켓몬이 이쪽을 매섭게 째려본다.",
 ];
@@ -151,7 +151,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
         fleeRateModifier: Math.min(3.0, state.fleeRateModifier * 1.5),
       }));
       get().checkFlee();
-    }, 1500);
+    }, 500);
   },
 
   checkFlee: () => {
@@ -169,6 +169,6 @@ export const useModalStore = create<ModalState>((set, get) => ({
       } else {
         set({ gameStatus: "ENCOUNTER" });
       }
-    }, 1500);
+    }, 1000);
   },
 }));
