@@ -1,8 +1,10 @@
 // /app/(tabs)/profile.tsx
 
+import { ProfileEditModal } from "@/src/components/modal/ProfileEditModal"; // 수정 모달 import
 import { usePokedexStore } from "@/src/store/pokedexStore";
 import { useProfileStore } from "@/src/store/profileStore";
-import { useMemo } from "react";
+import { FontAwesome } from "@expo/vector-icons"; // 아이콘 import
+import { useMemo, useState } from "react"; // useState import
 import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -28,10 +30,11 @@ const StatSummaryCard = ({
 export default function ProfileScreen() {
   const { username, avatarId, bio } = useProfileStore();
   const { caughtCounts } = usePokedexStore();
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false); // 모달 표시 여부 상태
 
   // 가장 많이 잡은 포켓몬을 찾는 로직
   const favoritePokemonId = useMemo(() => {
-    if (Object.keys(caughtCounts).length === 0) return avatarId; // 잡은 포켓몬이 없으면 기본 아바타
+    if (Object.keys(caughtCounts).length === 0) return avatarId;
 
     return Object.entries(caughtCounts).reduce((fav, current) => {
       return current[1] > fav[1] ? current : fav;
@@ -47,18 +50,20 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100 p-4">
       <View className="items-center">
-        {/* 프로필 아바타 */}
         <View className="relative">
           <Image
             source={{ uri: avatarUrl }}
             className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg"
           />
-          <Pressable className="absolute -bottom-1 -right-1 bg-blue-500 p-2 rounded-full border-2 border-white">
-            {/* 연필 아이콘 등 수정 기능 추가 가능 */}
+          {/* 수정 버튼 */}
+          <Pressable
+            onPress={() => setIsEditModalVisible(true)}
+            className="absolute -bottom-1 -right-1 bg-blue-500 p-2 rounded-full border-2 border-white"
+          >
+            <FontAwesome name="pencil" size={16} color="white" />
           </Pressable>
         </View>
 
-        {/* 유저 정보 */}
         <Text className="text-2xl font-bold mt-3">{username}</Text>
         <Text className="text-gray-500 mt-1 text-center">{bio}</Text>
       </View>
@@ -93,12 +98,17 @@ export default function ProfileScreen() {
           <View className="ml-4">
             <Text className="text-sm text-gray-500">가장 많이 만난 포켓몬</Text>
             <Text className="text-xl font-bold">
-              {/* 포켓몬 이름 불러오는 로직 필요 (향후 추가) */}
               포켓몬 #{favoritePokemonId}
             </Text>
           </View>
         </View>
       </View>
+
+      {/* 프로필 수정 모달 */}
+      <ProfileEditModal
+        visible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }

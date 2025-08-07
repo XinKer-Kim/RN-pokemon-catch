@@ -3,12 +3,14 @@
 import { create } from "zustand";
 
 // 프로필 스토어의 상태 타입
+// 프로필 스토어의 상태 타입
 interface ProfileState {
   username: string;
-  avatarId: string; // 아바타로 사용할 포켓몬의 ID
+  avatarId: string;
   bio: string;
   setUsername: (name: string) => void;
   setAvatarId: (id: string) => void;
+  setBio: (bio: string) => void; // 자기소개 수정 액션 추가
 }
 
 export const useProfileStore = create<ProfileState>((set) => ({
@@ -20,4 +22,5 @@ export const useProfileStore = create<ProfileState>((set) => ({
   // 프로필 정보를 업데이트하는 액션들
   setUsername: (name) => set({ username: name }),
   setAvatarId: (id) => set({ avatarId: id }),
+  setBio: (bio) => set({ bio: bio }), // 자기소개 수정 액션 구현
 }));
